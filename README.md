@@ -1,5 +1,11 @@
 # Diablo Loot Generator
-Basic weapon and armor loot name generator, based on Diablo II data. Converts original tab-delimited files from the game and parses them to generate randomized loot object names, along with stats. Results look something like this:
+Basic weapon and armor loot name generator, based on Diablo II data. Converts original tab-delimited files from the game and parses them to generate randomized loot object names, along with stats. 
+
+Has no dependencies. To run:
+
+`python prepare_database.py`
+
+Results look something like this:
 
 ```
 Coral Polished Wand of Raise Skeletons
