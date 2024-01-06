@@ -197,6 +197,7 @@ print("Loaded weapons:", len(WEAPONS))
 print("Loaded armor:", len(ARMOR))
 print("=======================")
 
-for i in range(100):
-    generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
-    print("=======================")
+generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
+print("=======================")
+generate_item(WEAPONS, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
+print("=======================")
