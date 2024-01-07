@@ -1,2 +1,4 @@
 data/loot.json
 __pycache__
+dist
+node_modules

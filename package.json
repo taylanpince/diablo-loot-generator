@@ -1,0 +1,21 @@
+{
+  "name": "loot-generator",
+  "version": "1.0.0",
+  "description": "Basic weapon and armor loot name generator, based on Diablo II data. Converts original tab-delimited files from the game and parses them to generate randomized loot object names, along with stats.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --watch",
+    "start": "webpack serve --open",
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "html-webpack-plugin": "^5.6.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  }
+}
