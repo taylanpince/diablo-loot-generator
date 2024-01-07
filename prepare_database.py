@@ -1,4 +1,5 @@
 import csv
+import json
 import random
 
 from pprint import pprint
@@ -91,18 +92,20 @@ def generate_addon_pool(item_type, all_addons):
 
     return addons
 
-def generate_item_name(item, prefix, suffix):
+def generate_item_name(item, prefixes, suffixes):
     item_name = item.get("name")
 
-    if prefix:
-        item_name = " ".join([prefix.get("Name"), item_name])
+    if len(prefixes) > 0:
+        item_name = " ".join([prefix.get("Name") for prefix in prefixes] + [item_name])
 
-    if suffix:
-        item_name = " ".join([item_name, suffix.get("Name")])
+    if len(suffixes) > 0:
+        item_name = " ".join([item_name] + [suffix.get("Name") for suffix in suffixes])
 
     return item_name
 
-def print_addon_stats(addon):
+def generate_addon_stats(addon):
+    stats = []
+
     for i in range(1, 3):
         mod_code = addon.get(f"mod{i}code").strip()
         if len(mod_code) == 0:
@@ -129,62 +132,112 @@ def print_addon_stats(addon):
             mod_denom_suffix = "%"
 
         if mod_param and mod_param != "0":
-            print(f"{mod_name} {mod_denom_prefix}{mod_param}{mod_denom_suffix}")
+            stats.append(f"{mod_name} {mod_denom_prefix}{mod_param}{mod_denom_suffix}")
         elif mod_min_val == mod_max_val:
-            print(f"{mod_name} {mod_denom_prefix}{mod_min_val}{mod_denom_suffix}")
+            stats.append(f"{mod_name} {mod_denom_prefix}{mod_min_val}{mod_denom_suffix}")
         else:
-            print(f"{mod_name} {mod_denom_prefix}{mod_min_val}-{mod_max_val}{mod_denom_suffix}")
+            stats.append(f"{mod_name} {mod_denom_prefix}{mod_min_val}-{mod_max_val}{mod_denom_suffix}")
 
-def print_weapon_stats(item, prefix, suffix):
+    return stats
+
+def generate_weapon_stats(item):
+    stats = []
+
     if item.get("2handed") == "1":
-        print(f"Damage: {item.get('2handmindam')}-{item.get('2handmaxdam')}")
+        stats.append(f"Damage: {item.get('2handmindam')}-{item.get('2handmaxdam')}")
     else:
-        print(f"Damage: {item.get('mindam')}-{item.get('maxdam')}")
+        stats.append(f"Damage: {item.get('mindam')}-{item.get('maxdam')}")
+    
+    return stats
 
-def print_armor_stats(item, prefix, suffix):
+def generate_armor_stats(item):
+    stats = []
     defense_min = item.get('minac')
     defense_max = item.get('maxac')
 
     if defense_min == defense_max:
-        print(f"Defense: {defense_min}")
+        stats.append(f"Defense: {defense_min}")
     else:
-        print(f"Defense: {defense_min}-{defense_max}")
+        stats.append(f"Defense: {defense_min}-{defense_max}")
+    
+    return stats
 
-def print_item_stats(item, prefix, suffix):
+def generate_item_stats(item, prefixes, suffixes):
+    stats = []
     item_code = item.get("type")
 
     if item_code in WEAPON_CODES:
-        print_weapon_stats(item, prefix, suffix)
+        stats.extend(generate_weapon_stats(item))
     elif item_code in ARMOR_CODES:
-        print_armor_stats(item, prefix, suffix)
+        stats.extend(generate_armor_stats(item))
 
-    if prefix:
-        print_addon_stats(prefix)
+    for prefix in prefixes:
+        stats.extend(generate_addon_stats(prefix))
 
-    if suffix:
-        print_addon_stats(suffix)
+    for suffix in suffixes:
+        stats.extend(generate_addon_stats(suffix))
+
+    return stats
 
 def generate_item(items, item_types, prefixes, suffixes):
     item = random.choice(items)
     item_code = item.get("type")
     item_type = item_types.get(item_code)
+    item_level = int(item.get("level"))
     prefix_pool = generate_addon_pool(item_type, prefixes)
     suffix_pool = generate_addon_pool(item_type, suffixes)
-    prefix = None
-    suffix = None
+    total_prefixes = 0
+    total_suffixes = 0
+    prefixes = []
+    suffixes = []
+
+    if item_level <= 30:
+        total_prefixes = random.choice([0, 1])
+        total_suffixes = random.choice([0, 1])
+    elif item_level > 30 and item_level <= 50:
+        total_prefixes = random.choice([0, 2])
+        total_suffixes = random.choice([0, 2])
+    elif item_level > 50 and item_level <= 70:
+        total_prefixes = random.choice([0, 3])
+        total_suffixes = random.choice([0, 3])
+    else:
+        total_prefixes = random.choice([0, 4])
+        total_suffixes = random.choice([0, 4])
 
     if prefix_pool:
-        prefix = random.choice(prefix_pool)
+        for i in range(total_prefixes):
+            if len(prefix_pool) == 0: break
+            prefix = random.choice(prefix_pool)
+            prefix_group = prefix.get("group")
+            prefixes.append(prefix)
+            prefix_pool = list(filter(lambda p: p.get("group") != prefix_group, prefix_pool))
 
     if suffix_pool:
-        suffix = random.choice(suffix_pool)
+        for i in range(total_suffixes):
+            if len(suffix_pool) == 0: break
+            suffix = random.choice(suffix_pool)
+            suffix_group = suffix.get("group")
+            suffixes.append(suffix)
+            suffix_pool = list(filter(lambda p: p.get("group") != suffix_group, suffix_pool))
 
-    item_name = generate_item_name(item, prefix, suffix)
+    rarity = "Common"
+    total_affixes = len(prefixes) + len(suffixes)
 
-    print(item_name)
-    print(item_type.get("ItemType"))
+    if total_affixes >= 4:
+        rarity = "Unique"
+    elif total_affixes >= 3:
+        rarity = "Legendary"
+    elif total_affixes >= 2:
+        rarity = "Rare"
+    elif total_affixes >= 1:
+        rarity = "Magic"
 
-    print_item_stats(item, prefix, suffix)
+    return {
+        "name": generate_item_name(item, prefixes, suffixes),
+        "type": item_type.get("ItemType"),
+        "stats": generate_item_stats(item, prefixes, suffixes),
+        "rarity": rarity,
+    }
 
 ITEM_TYPES = load_item_types(ITEM_TYPES_FILE, ITEM_TYPE_COLUMNS)
 MAGIC_PREFIXES = load_item_addons(MAGIC_PREFIX_FILE, MAGIC_COLUMNS)
@@ -197,7 +250,18 @@ print("Loaded weapons:", len(WEAPONS))
 print("Loaded armor:", len(ARMOR))
 print("=======================")
 
-generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
+ITEMS = []
+
+for i in range(100):
+    ITEMS.append(generate_item(WEAPONS, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES))
+
+print("Generated 100 weapons")
+
+for i in range(100):
+    ITEMS.append(generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES))
+
+print("Generated 100 armor")
 print("=======================")
-generate_item(WEAPONS, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
-print("=======================")
+
+with open("data/loot.json", "w") as f:
+    f.write(json.dumps({"items": ITEMS}, indent=4))
