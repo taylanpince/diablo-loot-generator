@@ -245,23 +245,30 @@ MAGIC_SUFFIXES = load_item_addons(MAGIC_SUFFIX_FILE, MAGIC_COLUMNS)
 WEAPONS = load_items(WEAPONS_FILE)
 ARMOR = load_items(ARMOR_FILE)
 
-print("Loaded item types:", len(ITEM_TYPES.keys()))
-print("Loaded weapons:", len(WEAPONS))
-print("Loaded armor:", len(ARMOR))
-print("=======================")
+def generate_random_armor():
+    generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
 
-ITEMS = []
+def generate_random_weapon():
+    generate_item(WEAPONS, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
 
-for i in range(100):
-    ITEMS.append(generate_item(WEAPONS, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES))
+if __name__ == "__main__":
+    print("Loaded item types:", len(ITEM_TYPES.keys()))
+    print("Loaded weapons:", len(WEAPONS))
+    print("Loaded armor:", len(ARMOR))
+    print("=======================")
 
-print("Generated 100 weapons")
+    ITEMS = []
 
-for i in range(100):
-    ITEMS.append(generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES))
+    for i in range(100):
+        ITEMS.append(generate_item(WEAPONS, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES))
 
-print("Generated 100 armor")
-print("=======================")
+    print("Generated 100 weapons")
 
-with open("data/loot.json", "w") as f:
-    f.write(json.dumps({"items": ITEMS}, indent=4))
+    for i in range(100):
+        ITEMS.append(generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES))
+
+    print("Generated 100 armor")
+    print("=======================")
+
+    with open("data/loot.json", "w") as f:
+        f.write(json.dumps({"items": ITEMS}, indent=4))
