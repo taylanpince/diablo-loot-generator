@@ -7,4 +7,5 @@ app = Flask(__name__)
 @app.route('/')
 def generate_loot():
     weapon = generate_random_weapon()
-    return render_template('loot.html', items=[weapon])
+    armor = generate_random_armor()
+    return render_template('loot.html', items=[weapon, armor])

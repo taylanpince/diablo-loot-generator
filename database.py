@@ -61,8 +61,25 @@ def load_item_addons(source_file, columns):
 
         for addon in reader:
             addon_name = addon.get("Name").strip()
+            class_specific = addon.get("classspecific").strip()
+            mod_found = False
+
+            for i in range(1, 3):
+                mod_code = addon.get(f"mod{i}code").strip()
+
+                if not ADDON_TYPES.get(mod_code):
+                    continue
+                else:
+                    mod_found = True
+                    break
+
+            if not mod_found:
+                continue
 
             if len(addon_name) == 0 or addon_name.lower() in INVALID_NAMES:
+                continue
+
+            if len(class_specific) > 0:
                 continue
 
             for column in columns:
@@ -79,6 +96,7 @@ def load_item_addons(source_file, columns):
 
 def generate_addon_pool(item_type, all_addons):
     addons = []
+    item_codes = []
 
     for column in ITEM_TYPE_COLUMNS:
         code = item_type.get(column)
@@ -86,8 +104,28 @@ def generate_addon_pool(item_type, all_addons):
         if len(code) == 0:
             continue
 
+        item_codes.append(code)
+
+    for code in item_codes:
         for addon in all_addons.get(code, []):
-            # TODO: Check for exclusion types (etype1, etype2, ...)
+            if addon in addons:
+                continue
+
+            exclusion_found = False
+
+            for i in range(1, 5):
+                exclusion_type = addon.get(f"etype{i}", "").strip()
+
+                if len(exclusion_type) == 0:
+                    continue
+
+                if exclusion_type in item_codes:
+                    exclusion_found = True
+                    break
+
+            if exclusion_found:
+                continue
+
             addons.append(addon)
 
     return addons
