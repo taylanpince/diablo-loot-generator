@@ -1,3 +1,11 @@
+RARITY_LEGENDARY = "Legendary"
+RARITY_RARE = "Rare"
+RARITY_MAGIC = "Magic"
+RARITY_COMMON = "Common"
+
+ITEM_CATEGORY_OFFENSIVE = "offensive"
+ITEM_CATEGORY_DEFENSIVE = "defensive"
+
 WEAPON_CODES = ("weap", "mele", "abow", "ajav", "aspe", "axe", "bow", "club", "h2h", "h2h2", "hamm", "jave", "knif", "mace", "orb", "pole", "scep", "spea", "staf", "swor", "taxe", "tkni", "tpot", "wand", "xbow")
 ARMOR_CODES = ("shie", "shld", "armo", "boot", "glov", "belt", "helm")
 

@@ -4,7 +4,7 @@ import random
 
 from pprint import pprint
 
-from constants import ADDON_TYPES, WEAPON_CODES, ARMOR_CODES
+from constants import *
 
 ITEM_TYPES_FILE = "data/diablo/ItemTypes.tsv"
 ARMOR_FILE = "data/diablo/Armor.tsv"
@@ -164,12 +164,16 @@ def generate_armor_stats(item):
 
 def generate_item_stats(item, prefixes, suffixes):
     stats = []
+    main_stats = []
+    item_category = None
     item_code = item.get("type")
 
     if item_code in WEAPON_CODES:
-        stats.extend(generate_weapon_stats(item))
+        item_category = ITEM_CATEGORY_OFFENSIVE
+        main_stats.extend(generate_weapon_stats(item))
     elif item_code in ARMOR_CODES:
-        stats.extend(generate_armor_stats(item))
+        item_category = ITEM_CATEGORY_DEFENSIVE
+        main_stats.extend(generate_armor_stats(item))
 
     for prefix in prefixes:
         stats.extend(generate_addon_stats(prefix))
@@ -177,7 +181,11 @@ def generate_item_stats(item, prefixes, suffixes):
     for suffix in suffixes:
         stats.extend(generate_addon_stats(suffix))
 
-    return stats
+    return {
+        "category": item_category,
+        "main_stats": main_stats,
+        "stats": stats,
+    }
 
 def generate_item(items, item_types, prefixes, suffixes):
     item = random.choice(items)
@@ -220,24 +228,25 @@ def generate_item(items, item_types, prefixes, suffixes):
             suffixes.append(suffix)
             suffix_pool = list(filter(lambda p: p.get("group") != suffix_group, suffix_pool))
 
-    rarity = "Common"
+    rarity = RARITY_COMMON
     total_affixes = len(prefixes) + len(suffixes)
 
-    if total_affixes >= 4:
-        rarity = "Unique"
-    elif total_affixes >= 3:
-        rarity = "Legendary"
+    if total_affixes >= 3:
+        rarity = RARITY_LEGENDARY
     elif total_affixes >= 2:
-        rarity = "Rare"
+        rarity = RARITY_RARE
     elif total_affixes >= 1:
-        rarity = "Magic"
+        rarity = RARITY_MAGIC
 
-    return {
+    base_item = {
         "name": generate_item_name(item, prefixes, suffixes),
         "type": item_type.get("ItemType"),
-        "stats": generate_item_stats(item, prefixes, suffixes),
-        "rarity": rarity,
+        "tier": rarity,
     }
+
+    base_item.update(generate_item_stats(item, prefixes, suffixes))
+
+    return base_item
 
 ITEM_TYPES = load_item_types(ITEM_TYPES_FILE, ITEM_TYPE_COLUMNS)
 MAGIC_PREFIXES = load_item_addons(MAGIC_PREFIX_FILE, MAGIC_COLUMNS)
@@ -246,10 +255,10 @@ WEAPONS = load_items(WEAPONS_FILE)
 ARMOR = load_items(ARMOR_FILE)
 
 def generate_random_armor():
-    generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
+    return generate_item(ARMOR, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
 
 def generate_random_weapon():
-    generate_item(WEAPONS, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
+    return generate_item(WEAPONS, ITEM_TYPES, MAGIC_PREFIXES, MAGIC_SUFFIXES)
 
 if __name__ == "__main__":
     print("Loaded item types:", len(ITEM_TYPES.keys()))
