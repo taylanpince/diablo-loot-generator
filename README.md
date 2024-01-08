@@ -60,3 +60,7 @@ flask run
 This will generate a new item and visualize it in an web page every time you load the page:
 
 ![Loot Sample](./images/loot.png)
+
+## Resources
+
+- [Diablo Wiki Item Generation Tutorial](https://diablo2.diablowiki.net/Item_Generation_Tutorial)
